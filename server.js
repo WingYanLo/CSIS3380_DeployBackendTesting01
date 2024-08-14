@@ -1,5 +1,3 @@
-require('dotenv').config(); // Load environment variables from .env file
-
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
@@ -11,6 +9,9 @@ const port = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json()); // Middleware to parse JSON request bodies
 
+// Hardcoded MongoDB URI (instead of using environment variables)
+const MONGO_URI = 'mongodb+srv://low3:ag6r77Ve9rGmMrdR@cluster0.hrxkceq.mongodb.net/AuctionDBTesting?retryWrites=true&w=majority';
+
 // MongoDB connection state
 let mongoConnectionPromise = null;
 
@@ -18,7 +19,7 @@ let mongoConnectionPromise = null;
 async function connectToDatabase() {
   if (!mongoConnectionPromise) {
     console.log("Attempting to connect to MongoDB...");
-    mongoConnectionPromise = mongoose.connect(process.env.MONGO_URI)
+    mongoConnectionPromise = mongoose.connect(MONGO_URI)
       .then(() => {
         console.log('Connected to MongoDB');
       })
