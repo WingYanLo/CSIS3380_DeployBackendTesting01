@@ -3,7 +3,7 @@ require('dotenv').config(); // Load environment variables from .env file
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
-const itemRouter = require('./routes/itemRouter');
+const itemRouter = require('./routes/itemRouter'); // Ensure this path is correct
 
 const app = express();
 const port = process.env.PORT || 3001;
@@ -16,21 +16,20 @@ let mongoConnectionPromise = null;
 
 // Function to connect to MongoDB (only connect once)
 async function connectToDatabase() {
-    if (!mongoConnectionPromise) {
-      console.log("Attempting to connect to MongoDB...");
-      mongoConnectionPromise = mongoose.connect(process.env.MONGO_URI)
-        .then(() => {
-          console.log('Connected to MongoDB');
-        })
-        .catch((error) => {
-          console.error('Failed to connect to MongoDB:', error.message);
-          mongoConnectionPromise = null; // Reset connection state on failure
-          throw error;
-        });
-    }
-    return mongoConnectionPromise;
+  if (!mongoConnectionPromise) {
+    console.log("Attempting to connect to MongoDB...");
+    mongoConnectionPromise = mongoose.connect(process.env.MONGO_URI)
+      .then(() => {
+        console.log('Connected to MongoDB');
+      })
+      .catch((error) => {
+        console.error('Failed to connect to MongoDB:', error.message);
+        mongoConnectionPromise = null; // Reset connection state on failure
+        throw error;
+      });
   }
-  
+  return mongoConnectionPromise;
+}
 
 // Force MongoDB connection on server startup
 connectToDatabase().catch(err => {
