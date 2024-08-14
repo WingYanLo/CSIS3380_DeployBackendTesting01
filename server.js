@@ -1,4 +1,4 @@
-require('dotenv').config(); // Load environment variables
+require('dotenv').config(); // Load environment variables from .env file
 
 const express = require('express');
 const cors = require('cors');
@@ -9,34 +9,33 @@ const app = express();
 const port = process.env.PORT || 3001;
 
 app.use(cors());
-app.use(express.json()); // Parse JSON request bodies
+app.use(express.json()); // Middleware to parse JSON request bodies
 
-// Persistent MongoDB Connection Setup
-let isConnected = false; // Track the connection state
+// MongoDB connection state
+let mongoConnectionPromise = null;
 
+// Function to connect to MongoDB (only connect once)
 async function connectToDatabase() {
-  if (isConnected) {
-    return; // If already connected, skip reconnection
+    if (!mongoConnectionPromise) {
+      console.log("Attempting to connect to MongoDB...");
+      mongoConnectionPromise = mongoose.connect(process.env.MONGO_URI)
+        .then(() => {
+          console.log('Connected to MongoDB');
+        })
+        .catch((error) => {
+          console.error('Failed to connect to MongoDB:', error.message);
+          mongoConnectionPromise = null; // Reset connection state on failure
+          throw error;
+        });
+    }
+    return mongoConnectionPromise;
   }
   
-  try {
-    const db = await mongoose.connect(process.env.MONGO_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
-    
-    isConnected = db.connections[0].readyState; // Set the connection state to "connected"
-    console.log('Connected to MongoDB');
-  } catch (error) {
-    console.error('Failed to connect to MongoDB:', error);
-    throw error; // Re-throw the error to prevent further execution if connection fails
-  }
-}
 
-// Apply the database connection before any routes are executed
-app.use(async (req, res, next) => {
-  await connectToDatabase(); // Ensure the database is connected
-  next(); // Proceed to the next middleware/route
+// Force MongoDB connection on server startup
+connectToDatabase().catch(err => {
+  console.error('MongoDB connection error:', err);
+  process.exit(1); // Exit if unable to connect to MongoDB
 });
 
 // Routes
