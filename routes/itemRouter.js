@@ -25,6 +25,7 @@ router.post('/', async (req, res) => {
         const savedItem = await newItem.save();
         console.log('New item created:', savedItem);
         res.json(savedItem);
+        res.status(201).json(savedItem);
     } catch (err) {
         console.error('Error creating item:', err.message);
         res.status(400).json({ error: err.message });
